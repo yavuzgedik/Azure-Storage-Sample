@@ -1,0 +1,81 @@
+﻿
+@{
+}
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.4.0/dropzone.css" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.4.0/dropzone.js"></script>
+
+<div class="row">
+    <div class="col-lg-8 offset-lg-2 mt-3">
+        <div class="card">
+            <div class="card-header bg-light">
+                Doküman Yükle
+            </div>
+            <div class="card-body">
+
+                <form action="/Document/Upload" class="dropzone" id="dropzoneForm" method="post" enctype="multipart/form-data">
+                    <div class="fallback">
+                        <input name="file" type="file" multiple />
+                        <input type="submit" value="Upload" />
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    Dropzone.options.dropzoneForm = {
+        dictDefaultMessage: "Dosyaları buraya sürükleyin veya eklemek için tıklayın.",
+        dictMaxFilesExceeded: "Limit dolduğu için yüklenemedi!",
+        dictInvalidFileType: "Dosya tipi uygun değil!",
+        //acceptedFiles: "image/jpeg,image/png,",
+        acceptedFiles: "image/*,application/pdf,",
+        init: function () {
+            this.on("complete", function (data) {
+                var res = JSON.parse(data.xhr.responseText);
+                console.log(data);
+                console.log(res.Url);
+
+                $.ajax({
+                    type: "POST",
+                    url: "/Document/RelationShip/",
+                    data: {
+                        id: '@ViewBag.id',
+                        url: res.Url,
+                    },
+                    success: function (result) {
+                        if (result.data == true) {
+                            //OK();
+                        }
+                        else {
+                            alert("Ağ Hatası, Lütfen Yeniden Deneyiniz.");
+                        }
+                    },
+                    error: function () {
+                        alert("Ağ Hatası, Lütfen Yeniden Deneyiniz.");
+                    }
+                });
+
+            });
+        },
+        maxFiles: 10,
+        queuecomplete: function (file, response) {
+            OK();
+        }
+    };
+
+    function OK() {
+        Swal.fire({
+            //position: 'top-end',
+            icon: 'success',
+            title: 'Doküman Yükleme Başarılı!',
+            showConfirmButton: false,
+            timer: 3000
+        })
+    }
+
+</script>
